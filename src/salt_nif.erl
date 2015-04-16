@@ -45,7 +45,9 @@
 %%%
 
 load() ->
-    Path = filename:join([code:priv_dir(salt), erlang:system_info(system_architecture), "salt_nif"]),
+    %%Path = filename:join([code:priv_dir(salt), erlang:system_info(system_architecture), "salt_nif"]),
+    Priv_Dir = filename:join(priv_dir(), erlang:system_info(system_architecture)),
+    Path = filename:join(Priv_Dir, ?MODULE),
     erlang:load_nif(Path, 0).
 
 %%% Exported from salt_nif.c.
@@ -121,3 +123,12 @@ salt_verify_32(_, _) ->
 
 salt_random_bytes(_, _, _, _) ->
     error(salt_not_loaded).
+
+
+priv_dir() ->
+    case code:priv_dir(salt) of
+        {error, bad_name} ->
+            filename:join(filename:dirname(filename:dirname(code:which(?MODULE))), "priv");
+        D ->
+            D
+    end.
